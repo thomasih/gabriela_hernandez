@@ -6,13 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
-    /* Basic CSS reset */
+    /* Basic reset */
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
-
     body {
       font-family: Arial, sans-serif;
       background: #fffaf0;
@@ -22,88 +21,58 @@
       flex-direction: column;
       align-items: center;
     }
-
     .container {
       max-width: 600px;
       width: 100%;
       margin: 0 auto;
       text-align: center;
     }
-
     h1, h2, p {
       margin-bottom: 1em;
     }
-
     h1 {
       font-size: 2rem;
       margin-top: 1rem;
     }
-
     h2 {
       font-size: 1.5rem;
-      color: #cc0000;
+      color: #cc0000; /* a nice red color */
     }
-
     .message {
       margin-bottom: 2em;
     }
-
-    /* 
-      The .gallery uses a simple masonry-like layout via column-count.
-      - On small screens (under 600px), we show 1 column (stacked).
-      - On medium screens (600px+), 2 columns.
-      - On large screens (900px+), 3 columns.
-    */
-    .gallery {
-      column-gap: 20px; /* space between columns */
-    }
-    @media (min-width: 600px) {
-      .gallery {
-        column-count: 2;
-      }
-    }
-    @media (min-width: 900px) {
-      .gallery {
-        column-count: 3;
-      }
-    }
-
-    /* 
-      We will apply a random "small", "medium", or "big" class 
-      to each image to create slight variations in width. 
-    */
-    .gallery img {
-      display: block;
-      margin-bottom: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      /* Ensure images scale properly and keep aspect ratio: */
-      height: auto;
-    }
-
-    /* Random classes for subtle differences in width */
-    .small {
-      width: 80%;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .medium {
-      width: 90%;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .big {
-      width: 100%; /* effectively the width of the column */
-    }
-
     .footer {
       margin-top: 2em;
       font-style: italic;
       color: #777;
     }
+
+    /* 
+      The .gallery container is positioned relative, and we’ll 
+      absolutely position all images inside it in a "collage" style.
+    */
+    .gallery {
+      position: relative;
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      /* We'll set the height dynamically in JavaScript 
+         as we add images. */
+      min-height: 400px; 
+      border: 2px dashed #ccc; /* Just so you can see the container boundary. Optional */
+      margin-bottom: 50px;
+    }
+    .gallery img {
+      position: absolute;
+      left: 50%; /* We’ll shift from the horizontal center. */
+      transform-origin: center center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
+
   <div class="container">
     <div class="message">
       <h1>Dear Gabi,</h1>
@@ -112,11 +81,10 @@
         I have created your very own website so that you can see a timeline
         of our time together whenever and wherever you are.
       </p>
-      <p>
-        I Love You, Enjoy :)
-      </p>
+      <p>I Love You, Enjoy :)</p>
     </div>
 
+    <!-- Collage container -->
     <div class="gallery" id="gallery"></div>
 
     <div class="footer">
@@ -126,30 +94,63 @@
 
   <script>
     /**
-     * Dynamically load images from the pictures folder.
-     * We assume they are named IMG_1.JPG, IMG_2.JPG, IMG_3.JPG, etc.
+     * This script loops from IMG_1.JPG to IMG_200.JPG,
+     * tries to load each, and if successful, appends it to
+     * the "gallery" in a random overlapping collage style.
      */
     const MAX_PHOTOS = 200;
-    const gallery = document.getElementById("gallery");
+    const gallery = document.getElementById('gallery');
 
-    // We'll randomly assign each image one of three size classes for variety.
-    const sizeClasses = ["small", "medium", "big"];
+    let topOffset = 0; 
+    // This will keep track of how far down we've placed images so far.
+    // We'll increase it after each image, so they stack in a vertical sequence,
+    // but with some overlap and random horizontal movement.
 
     for (let i = 1; i <= MAX_PHOTOS; i++) {
       const img = new Image();
       img.src = `pictures/IMG_${i}.JPG`;
 
-      // When the image loads, append it
       img.onload = function() {
-        // Pick a random class from sizeClasses
-        const randomClass = sizeClasses[Math.floor(Math.random() * sizeClasses.length)];
-        img.classList.add(randomClass);
+        // Random scale between 0.8 and 1.2
+        const scale = 0.8 + Math.random() * 0.4;
+        // Random horizontal shift between -100px and +100px
+        const xOffset = Math.floor(Math.random() * 201) - 100;
+        // Random rotation between -5° and +5°
+        const rotation = (Math.random() * 10) - 5;
+
+        // Position the image:
+        // 1) move to the horizontal center: translateX(-50%)
+        // 2) shift left/right by xOffset
+        // 3) rotate slightly
+        // 4) scale
+        img.style.transform = `
+          translateX(-50%) 
+          translateX(${xOffset}px)
+          rotate(${rotation}deg)
+          scale(${scale})
+        `;
+
+        // Place it at the current top offset
+        img.style.top = `${topOffset}px`;
+        img.style.zIndex = i; // so later images are on top
+
+        // Append it to the gallery
         gallery.appendChild(img);
+
+        // We'll increment topOffset by the approximate final height,
+        // but let's allow some overlap vertically too, so we multiply
+        // the final height by e.g. 0.7 or 0.8
+        const finalHeight = img.naturalHeight * scale;
+        topOffset += finalHeight * 0.75;
+
+        // Dynamically set the gallery's height so it can contain all images
+        // (add a bit of padding so the last image isn't cut off)
+        gallery.style.height = (topOffset + 200) + 'px';
       };
 
-      // If it fails, just ignore it
+      // If the image fails, do nothing (it simply won't appear)
       img.onerror = function() {
-        // Do nothing on error
+        // no-op
       };
     }
   </script>
