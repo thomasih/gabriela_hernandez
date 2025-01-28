@@ -4,75 +4,81 @@
   <meta charset="UTF-8" />
   <title>Happy Birthday Gabi</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <style>
-    /* Basic reset */
+    /* Basic CSS reset */
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
+
     body {
       font-family: Arial, sans-serif;
-      background: #fffaf0;
+      background: #fffaf0; /* Subtle background */
       color: #444;
       padding: 20px;
+      line-height: 1.5;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
+
     .container {
       max-width: 600px;
       width: 100%;
       margin: 0 auto;
       text-align: center;
     }
+
     h1, h2, p {
       margin-bottom: 1em;
     }
+
     h1 {
       font-size: 2rem;
       margin-top: 1rem;
     }
+
     h2 {
       font-size: 1.5rem;
-      color: #cc0000; /* a nice red color */
+      color: #cc0000; /* A nice red for "Happy Birthday" */
     }
+
     .message {
       margin-bottom: 2em;
     }
+
+    /* 
+       Gallery: display in a row that can wrap 
+       so images can fit side by side if they’re small enough.
+    */
+    .gallery {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px; /* spacing between items */
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .gallery img {
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      /* We'll apply dynamic width in JS, but 
+         enforce max-width 100% to keep them from overflowing */
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+
     .footer {
       margin-top: 2em;
       font-style: italic;
       color: #777;
     }
-
-    /* 
-      The .gallery container is positioned relative, and we’ll 
-      absolutely position all images inside it in a "collage" style.
-    */
-    .gallery {
-      position: relative;
-      width: 100%;
-      max-width: 600px;
-      margin: 0 auto;
-      /* We'll set the height dynamically in JavaScript 
-         as we add images. */
-      min-height: 400px; 
-      border: 2px dashed #ccc; /* Just so you can see the container boundary. Optional */
-      margin-bottom: 50px;
-    }
-    .gallery img {
-      position: absolute;
-      left: 50%; /* We’ll shift from the horizontal center. */
-      transform-origin: center center;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      border-radius: 8px;
-    }
   </style>
 </head>
 <body>
-
   <div class="container">
     <div class="message">
       <h1>Dear Gabi,</h1>
@@ -84,7 +90,6 @@
       <p>I Love You, Enjoy :)</p>
     </div>
 
-    <!-- Collage container -->
     <div class="gallery" id="gallery"></div>
 
     <div class="footer">
@@ -94,63 +99,31 @@
 
   <script>
     /**
-     * This script loops from IMG_1.JPG to IMG_200.JPG,
-     * tries to load each, and if successful, appends it to
-     * the "gallery" in a random overlapping collage style.
+     * Dynamically load images from the pictures folder.
+     * We assume they are named IMG_1.JPG, IMG_2.JPG, ...
+     * This script loops from 1 to a certain upper limit,
+     * tries to load each image, and displays it if it exists.
      */
     const MAX_PHOTOS = 200;
-    const gallery = document.getElementById('gallery');
-
-    let topOffset = 0; 
-    // This will keep track of how far down we've placed images so far.
-    // We'll increase it after each image, so they stack in a vertical sequence,
-    // but with some overlap and random horizontal movement.
+    const gallery = document.getElementById("gallery");
 
     for (let i = 1; i <= MAX_PHOTOS; i++) {
       const img = new Image();
       img.src = `pictures/IMG_${i}.JPG`;
 
+      // When the image loads, we give it a random width (within reason)
       img.onload = function() {
-        // Random scale between 0.8 and 1.2
-        const scale = 0.8 + Math.random() * 0.4;
-        // Random horizontal shift between -100px and +100px
-        const xOffset = Math.floor(Math.random() * 201) - 100;
-        // Random rotation between -5° and +5°
-        const rotation = (Math.random() * 10) - 5;
-
-        // Position the image:
-        // 1) move to the horizontal center: translateX(-50%)
-        // 2) shift left/right by xOffset
-        // 3) rotate slightly
-        // 4) scale
-        img.style.transform = `
-          translateX(-50%) 
-          translateX(${xOffset}px)
-          rotate(${rotation}deg)
-          scale(${scale})
-        `;
-
-        // Place it at the current top offset
-        img.style.top = `${topOffset}px`;
-        img.style.zIndex = i; // so later images are on top
-
-        // Append it to the gallery
+        // Set a random width in pixels between (for example) 150 and 300px
+        const randomWidth = Math.floor(Math.random() * (300 - 150 + 1)) + 150;
+        img.style.width = randomWidth + "px";
+        
+        // Append to the gallery after setting width
         gallery.appendChild(img);
-
-        // We'll increment topOffset by the approximate final height,
-        // but let's allow some overlap vertically too, so we multiply
-        // the final height by e.g. 0.7 or 0.8
-        const finalHeight = img.naturalHeight * scale;
-        topOffset += finalHeight * 0.75;
-
-        // Dynamically set the gallery's height so it can contain all images
-        // (add a bit of padding so the last image isn't cut off)
-        gallery.style.height = (topOffset + 200) + 'px';
       };
 
-      // If the image fails, do nothing (it simply won't appear)
+      // If the image doesn't exist, do nothing and continue
       img.onerror = function() {
-        // no-op
+        // Do nothing on error (image doesn't exist)
       };
     }
   </script>
