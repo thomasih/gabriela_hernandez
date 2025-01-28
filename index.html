@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>Happy Birthday Gabi</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <style>
     /* Basic CSS reset */
     * {
@@ -11,10 +12,10 @@
       margin: 0;
       padding: 0;
     }
-
+    
     body {
       font-family: Arial, sans-serif;
-      background: #fffaf0; /* subtle off-white background */
+      background: #fffaf0; /* Light, subtle background color */
       color: #444;
       padding: 20px;
       line-height: 1.5;
@@ -24,7 +25,7 @@
     }
 
     .container {
-      max-width: 600px;
+      max-width: 800px; /* a bit wider so columns can fit nicely */
       width: 100%;
       margin: 0 auto;
       text-align: center;
@@ -41,38 +42,26 @@
 
     h2 {
       font-size: 1.5rem;
-      color: #cc0000; /* a nice red for "Happy Birthday" */
+      color: #cc0000; /* A nice red for "Happy Birthday" */
     }
 
     .message {
       margin-bottom: 2em;
     }
 
-    /* 
-      Gallery uses flex + wrap to allow multiple "columns."
-      We also add some gap between images.
-    */
+    /* Masonry/column layout for the gallery */
     .gallery {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px; 
+      column-count: 2;       /* Two columns */
+      column-gap: 20px;      /* Gap between columns */
       width: 100%;
-      margin-top: 20px;
     }
-
-    /* 
-      Each image has:
-        - A max-width of 100% to avoid overflowing
-        - Height auto so aspect ratio is never distorted
-        - A slight border-radius and box-shadow for style
-    */
     .gallery img {
+      width: 100%;
+      height: auto;          /* Maintain aspect ratio */
+      display: block;        /* Eliminate inline-block spacing */
+      margin-bottom: 20px;   /* Spacing between images in each column */
       border-radius: 8px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      max-width: 100%;
-      height: auto;
-      display: block;
     }
 
     .footer {
@@ -82,15 +71,20 @@
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <div class="message">
       <h1>Dear Gabi,</h1>
       <h2>Happy Birthday!</h2>
-      <p>I have created your very own website so that you can see a timeline of our time together whenever and wherever you are.</p>
+      <p>
+        I have created your very own website so that you can see a timeline
+        of our time together whenever and wherever you are.
+      </p>
       <p>I Love You, Enjoy :)</p>
     </div>
 
+    <!-- This is where the photos will appear -->
     <div class="gallery" id="gallery"></div>
 
     <div class="footer">
@@ -100,31 +94,27 @@
 
   <script>
     /**
-     * Dynamically load images from the /pictures folder.
-     * They should be named IMG_1.JPG, IMG_2.JPG, etc.
-     * This loops from 1..MAX_PHOTOS, tries each image,
-     * and displays it if found.
+     * Dynamically load images from the pictures folder.
+     * We assume they are named IMG_1.JPG, IMG_2.JPG, IMG_3.JPG, etc.
+     * This script loops from 1 to a certain upper limit,
+     * tries to load each image, and displays it if it exists.
      */
-    const MAX_PHOTOS = 200;
+    const MAX_PHOTOS = 200; // Adjust as needed
     const gallery = document.getElementById("gallery");
 
     for (let i = 1; i <= MAX_PHOTOS; i++) {
       const img = new Image();
+      // Construct the image path
       img.src = `pictures/IMG_${i}.JPG`;
 
+      // When the image successfully loads, append it to the gallery
       img.onload = function() {
-        // Give each image a random width between 150px and 300px
-        // Height auto (the default) will preserve the aspect ratio
-        const randomWidth = Math.floor(Math.random() * (300 - 150 + 1)) + 150;
-        img.style.width = randomWidth + "px";
-
-        // Append the image to the gallery after setting width
         gallery.appendChild(img);
       };
-
-      // If the image file doesn't exist, do nothing
+      
+      // If the image fails (e.g., doesn't exist yet), just ignore.
       img.onerror = function() {
-        // No action needed
+        // do nothing
       };
     }
   </script>
