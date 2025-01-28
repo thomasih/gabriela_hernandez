@@ -1,15 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Message for My Girlfriend</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Happy Birthday Gabi</title>
+  <!-- Ensures the page scales correctly on mobile -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <style>
+    /* Basic CSS reset */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+      background: #fffaf0; /* Light, subtle background color */
+      color: #444;
+      padding: 20px;
+      line-height: 1.5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    h1, h2, p {
+      margin-bottom: 1em;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-top: 1rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      color: #cc0000; /* A nice red for "Happy Birthday" */
+    }
+
+    .message {
+      margin-bottom: 2em;
+    }
+
+    .gallery {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .gallery img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      margin: 0 auto;
+      display: block;
+    }
+
+    .footer {
+      margin-top: 2em;
+      font-style: italic;
+      color: #777;
+    }
+  </style>
 </head>
+
 <body>
-    <h1>Hey Love ❤️</h1>
-    <p>This is your special message. I love you!</p>
+  <div class="container">
+    <div class="message">
+      <h1>Dear Gabi,</h1>
+      <h2>Happy Birthday!</h2>
+      <p>
+        I have created your very own website so that you can see a timeline
+        of our time together whenever and wherever you are.
+      </p>
+      <p>
+        I Love You, Enjoy :)
+      </p>
+    </div>
+
+    <!-- This is where the photos will appear -->
+    <div class="gallery" id="gallery"></div>
+
+    <div class="footer">
+      More to come!
+    </div>
+  </div>
+
+  <script>
+    /**
+     * Dynamically load images from the pictures folder.
+     * We assume they are named IMG_1.JPG, IMG_2.JPG, IMG_3.JPG, etc.
+     * This script loops from 1 to a certain upper limit,
+     * tries to load each image, and displays it if it exists.
+     */
+
+    // Adjust this to a higher number if you expect a large number of photos
+    const MAX_PHOTOS = 200; 
+
+    const gallery = document.getElementById("gallery");
+
+    for (let i = 1; i <= MAX_PHOTOS; i++) {
+      const img = new Image();
+      // Construct the image path
+      img.src = `pictures/IMG_${i}.JPG`;
+
+      // When the image successfully loads, append it to the gallery
+      img.onload = function() {
+        gallery.appendChild(img);
+      };
+      
+      // If the image fails (e.g., doesn't exist yet), we do nothing.
+      // We could stop the loop entirely on the first error, but leaving
+      // it open allows for skipping numbers if needed.
+      img.onerror = function() {
+        // Do nothing on error, just keep going to the next number
+      };
+    }
+  </script>
 </body>
 </html>
