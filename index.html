@@ -1,33 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Happy Birthday Gabi</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    /* Reset some defaults for consistency */
+    /* Reset */
     * {
       box-sizing: border-box;
-      margin: 0; 
+      margin: 0;
       padding: 0;
     }
 
     body {
       font-family: Arial, sans-serif;
-      background-color: #fffaf0; /* Solid color, no gradient */
+      background-color: #fffaf0; /* Light solid background, no gradient */
       color: #444;
       margin: 0;
-      padding: 20px; /* Some breathing room around the content */
+      padding: 20px;
     }
 
     .container {
-      max-width: 800px; 
-      margin: 0 auto; /* Center the container */
+      max-width: 800px;
+      margin: 0 auto;
       text-align: center;
     }
 
     h1, h2, p {
-      margin-bottom: 1em;
+      margin-bottom: 1rem;
     }
 
     h1 {
@@ -41,26 +41,30 @@
     }
 
     .message {
-      margin-bottom: 2em;
+      margin-bottom: 2rem;
     }
 
-    /* Two-column "masonry" layout */
+    /* Two-column layout */
     .gallery {
-      column-count: 2;   /* Two columns */
-      column-gap: 20px;  /* Spacing between columns */
-      width: 100%;
+      display: flex;         /* Use flex to create 2 side-by-side columns */
+      gap: 20px;             /* Space between columns */
+      justify-content: center;
     }
-    .gallery img {
-      width: 100%;
-      height: auto;       /* Maintain aspect ratio */
-      display: block;     /* Remove extra whitespace below images */
-      margin-bottom: 20px; 
+    .column {
+      flex: 1;               /* Each column takes up half the available width */
+      max-width: 50%;        /* Prevent columns from stretching too wide */
+    }
+    .column img {
+      width: 100%;           /* Full width of its column */
+      height: auto;          /* Keep aspect ratio intact */
+      display: block;
+      margin-bottom: 20px;
       border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 
     .footer {
-      margin-top: 2em;
+      margin-top: 2rem;
       font-style: italic;
       color: #777;
     }
@@ -75,13 +79,14 @@
         I have created your very own website so that you can see a timeline
         of our time together whenever and wherever you are.
       </p>
-      <p>
-        I Love You, Enjoy :)
-      </p>
+      <p>I Love You, Enjoy :)</p>
     </div>
 
-    <!-- Gallery container -->
-    <div class="gallery" id="gallery"></div>
+    <!-- Two separate columns -->
+    <div class="gallery">
+      <div class="column" id="colLeft"></div>
+      <div class="column" id="colRight"></div>
+    </div>
 
     <div class="footer">
       More to come!
@@ -90,23 +95,33 @@
 
   <script>
     /**
-     * Display images in numeric order (IMG_1.JPG, IMG_2.JPG, etc.).
-     * If an image doesn't exist, remove that broken <img>.
+     * We iterate from 1 to MAX_PHOTOS. For each i:
+     *  - If i is odd, place IMG_i in the left column.
+     *  - If i is even, place IMG_i in the right column.
+     * This ensures 1 (left), 2 (right), 3 (left), 4 (right), etc.
      */
-    const MAX_PHOTOS = 200; // Increase if needed
-    const gallery = document.getElementById('gallery');
+
+    const MAX_PHOTOS = 200;
+    const colLeft = document.getElementById('colLeft');
+    const colRight = document.getElementById('colRight');
 
     for (let i = 1; i <= MAX_PHOTOS; i++) {
       const img = document.createElement('img');
       img.src = `pictures/IMG_${i}.JPG`;
       img.alt = `Photo ${i}`;
 
-      // Append immediately (to keep the DOM order in sync with numeric order).
-      gallery.appendChild(img);
+      // Append in numeric order:
+      if (i % 2 === 1) {
+        // Odd -> left column
+        colLeft.appendChild(img);
+      } else {
+        // Even -> right column
+        colRight.appendChild(img);
+      }
 
-      // If the image doesn't load, remove it from the gallery.
-      img.onerror = () => {
-        gallery.removeChild(img);
+      // If file doesn't exist, remove the broken <img>
+      img.onerror = function() {
+        this.parentNode.removeChild(this);
       };
     }
   </script>
