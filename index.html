@@ -4,30 +4,25 @@
   <meta charset="UTF-8" />
   <title>Happy Birthday Gabi</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <style>
-    /* Basic CSS reset */
+    /* Reset some defaults for consistency */
     * {
       box-sizing: border-box;
-      margin: 0;
+      margin: 0; 
       padding: 0;
     }
-    
+
     body {
       font-family: Arial, sans-serif;
-      background: #fffaf0; /* Light, subtle background color */
+      background-color: #fffaf0; /* Solid color, no gradient */
       color: #444;
-      padding: 20px;
-      line-height: 1.5;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      margin: 0;
+      padding: 20px; /* Some breathing room around the content */
     }
 
     .container {
-      max-width: 800px; /* a bit wider so columns can fit nicely */
-      width: 100%;
-      margin: 0 auto;
+      max-width: 800px; 
+      margin: 0 auto; /* Center the container */
       text-align: center;
     }
 
@@ -49,17 +44,17 @@
       margin-bottom: 2em;
     }
 
-    /* Masonry/column layout for the gallery */
+    /* Two-column "masonry" layout */
     .gallery {
-      column-count: 2;       /* Two columns */
-      column-gap: 20px;      /* Gap between columns */
+      column-count: 2;   /* Two columns */
+      column-gap: 20px;  /* Spacing between columns */
       width: 100%;
     }
     .gallery img {
       width: 100%;
-      height: auto;          /* Maintain aspect ratio */
-      display: block;        /* Eliminate inline-block spacing */
-      margin-bottom: 20px;   /* Spacing between images in each column */
+      height: auto;       /* Maintain aspect ratio */
+      display: block;     /* Remove extra whitespace below images */
+      margin-bottom: 20px; 
       border-radius: 8px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
@@ -71,7 +66,6 @@
     }
   </style>
 </head>
-
 <body>
   <div class="container">
     <div class="message">
@@ -81,10 +75,12 @@
         I have created your very own website so that you can see a timeline
         of our time together whenever and wherever you are.
       </p>
-      <p>I Love You, Enjoy :)</p>
+      <p>
+        I Love You, Enjoy :)
+      </p>
     </div>
 
-    <!-- This is where the photos will appear -->
+    <!-- Gallery container -->
     <div class="gallery" id="gallery"></div>
 
     <div class="footer">
@@ -94,27 +90,23 @@
 
   <script>
     /**
-     * Dynamically load images from the pictures folder.
-     * We assume they are named IMG_1.JPG, IMG_2.JPG, IMG_3.JPG, etc.
-     * This script loops from 1 to a certain upper limit,
-     * tries to load each image, and displays it if it exists.
+     * Display images in numeric order (IMG_1.JPG, IMG_2.JPG, etc.).
+     * If an image doesn't exist, remove that broken <img>.
      */
-    const MAX_PHOTOS = 200; // Adjust as needed
-    const gallery = document.getElementById("gallery");
+    const MAX_PHOTOS = 200; // Increase if needed
+    const gallery = document.getElementById('gallery');
 
     for (let i = 1; i <= MAX_PHOTOS; i++) {
-      const img = new Image();
-      // Construct the image path
+      const img = document.createElement('img');
       img.src = `pictures/IMG_${i}.JPG`;
+      img.alt = `Photo ${i}`;
 
-      // When the image successfully loads, append it to the gallery
-      img.onload = function() {
-        gallery.appendChild(img);
-      };
-      
-      // If the image fails (e.g., doesn't exist yet), just ignore.
-      img.onerror = function() {
-        // do nothing
+      // Append immediately (to keep the DOM order in sync with numeric order).
+      gallery.appendChild(img);
+
+      // If the image doesn't load, remove it from the gallery.
+      img.onerror = () => {
+        gallery.removeChild(img);
       };
     }
   </script>
