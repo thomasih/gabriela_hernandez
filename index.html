@@ -5,72 +5,72 @@
   <title>Happy Birthday Gabi</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    /* Reset */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    /* Reset and site styles */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background-color: #FFB6C1; color: #444; margin: 0; padding: 20px; }
+    .container { max-width: 800px; margin: 0 auto; text-align: center; }
+    h1, h2, p { margin-bottom: 1rem; }
+    h1 { font-size: 2rem; margin-top: 1rem; }
+    h2 { font-size: 1.5rem; color: #cc0000; }
+    .message { margin-bottom: 2rem; }
+    .gallery { display: flex; gap: 20px; justify-content: center; }
+    .column { flex: 1; max-width: 50%; }
+    .column img { width: 100%; height: auto; display: block; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); }
+    .footer { margin-top: 2rem; font-style: italic; color: #777; }
 
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #FFB6C1; /* Baby pink background */
-      color: #444;
-      margin: 0;
+    /* Password overlay styles */
+    #passwordOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(255, 182, 193, 0.95); /* semi-transparent baby pink */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    #passwordOverlay form {
+      background: #fff;
       padding: 20px;
-    }
-
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       text-align: center;
     }
-
-    h1, h2, p {
-      margin-bottom: 1rem;
+    #passwordOverlay input[type="password"] {
+      padding: 10px;
+      width: 200px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
     }
-
-    h1 {
-      font-size: 2rem;
-      margin-top: 1rem;
+    #passwordOverlay input[type="submit"] {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      background: #cc0000;
+      color: #fff;
+      cursor: pointer;
     }
-
-    h2 {
-      font-size: 1.5rem;
-      color: #cc0000; /* A nice red for "Happy Birthday" */
-    }
-
-    .message {
-      margin-bottom: 2rem;
-    }
-
-    /* Two-column layout */
-    .gallery {
-      display: flex;         /* Use flex to create 2 side-by-side columns */
-      gap: 20px;             /* Space between columns */
-      justify-content: center;
-    }
-    .column {
-      flex: 1;               /* Each column takes up half the available width */
-      max-width: 50%;        /* Prevent columns from stretching too wide */
-    }
-    .column img {
-      width: 100%;           /* Full width of its column */
-      height: auto;          /* Keep aspect ratio intact */
-      display: block;
-      margin-bottom: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .footer {
-      margin-top: 2rem;
-      font-style: italic;
-      color: #777;
+    #errorMessage {
+      color: red;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
+  <!-- Password Overlay -->
+  <div id="passwordOverlay">
+    <form id="passwordForm">
+      <h2>Enter Password</h2>
+      <input type="password" id="passwordInput" placeholder="Password" required />
+      <br/>
+      <input type="submit" value="Submit" />
+      <div id="errorMessage"></div>
+    </form>
+  </div>
+
   <div class="container">
     <div class="message">
       <h1>Dear Gabi,</h1>
@@ -82,8 +82,8 @@
       <p>I love you, Enjoy :)</p>
     </div>
 
-    <!-- Two separate columns -->
-    <div class="gallery">
+    <!-- Gallery container -->
+    <div class="gallery" id="gallery">
       <div class="column" id="colLeft"></div>
       <div class="column" id="colRight"></div>
     </div>
@@ -94,35 +94,53 @@
   </div>
 
   <script>
-    /**
-     * We iterate from 1 to MAX_PHOTOS. For each i:
-     *  - If i is odd, place IMG_i in the left column.
-     *  - If i is even, place IMG_i in the right column.
-     * This ensures 1 (left), 2 (right), 3 (left), 4 (right), etc.
-     */
+    // Precomputed SHA-256 hash for "gabixthomas"
+    // Replace the value below with the actual hash computed offline.
+    const storedHash = "13ba7a21d923233e00338058a4be1a71833a4dae8bcb29f7b95968fbbee9be69";
 
-    const MAX_PHOTOS = 200;
-    const colLeft = document.getElementById('colLeft');
-    const colRight = document.getElementById('colRight');
+    // Function to compute SHA-256 hash of a string using Web Crypto API
+    async function hashPassword(password) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
 
-    for (let i = 1; i <= MAX_PHOTOS; i++) {
-      const img = document.createElement('img');
-      img.src = `pictures/IMG_${i}.JPG`;
-      img.alt = `Photo ${i}`;
-
-      // Append in numeric order:
-      if (i % 2 === 1) {
-        // Odd -> left column
-        colLeft.appendChild(img);
+    // Handle password form submission
+    document.getElementById('passwordForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const password = document.getElementById('passwordInput').value;
+      const hash = await hashPassword(password);
+      if(hash === storedHash) {
+        // Correct password: hide overlay and load gallery
+        document.getElementById('passwordOverlay').style.display = 'none';
+        loadGallery();
       } else {
-        // Even -> right column
-        colRight.appendChild(img);
+        document.getElementById('errorMessage').textContent = "Incorrect password. Please try again.";
       }
+    });
 
-      // If file doesn't exist, remove the broken <img>
-      img.onerror = function() {
-        this.parentNode.removeChild(this);
-      };
+    // Function to load the image gallery
+    function loadGallery() {
+      const MAX_PHOTOS = 200;
+      const colLeft = document.getElementById('colLeft');
+      const colRight = document.getElementById('colRight');
+
+      for (let i = 1; i <= MAX_PHOTOS; i++) {
+        const img = document.createElement('img');
+        img.src = `pictures/IMG_${i}.JPG`;
+        img.alt = `Photo ${i}`;
+        if (i % 2 === 1) {
+          colLeft.appendChild(img);
+        } else {
+          colRight.appendChild(img);
+        }
+        // Remove the image if it fails to load
+        img.onerror = function() {
+          this.parentNode.removeChild(this);
+        };
+      }
     }
   </script>
 </body>
