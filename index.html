@@ -5,7 +5,7 @@
   <title>Happy Birthday Gabi</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    /* Reset and site styles */
+    /* Reset and main site styles */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; background-color: #FFB6C1; color: #444; margin: 0; padding: 20px; }
     .container { max-width: 800px; margin: 0 auto; text-align: center; }
@@ -18,60 +18,56 @@
     .column img { width: 100%; height: auto; display: block; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); }
     .footer { margin-top: 2rem; font-style: italic; color: #777; }
 
-    /* Password overlay styles */
+    /* Minimal Password Overlay */
     #passwordOverlay {
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(255, 182, 193, 0.95); /* semi-transparent baby pink */
+      background: #FFB6C1;
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 1000;
     }
-    #passwordOverlay form {
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    #passwordContainer {
       text-align: center;
     }
-    #passwordOverlay input[type="password"] {
-      padding: 10px;
-      width: 200px;
-      margin-bottom: 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+    #passwordPrompt {
+      font-size: 2rem;
+      margin-bottom: 20px;
     }
-    #passwordOverlay input[type="submit"] {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 4px;
-      background: #cc0000;
-      color: #fff;
+    #passwordDots {
+      font-size: 2rem;
+      letter-spacing: 10px;
+      margin-bottom: 20px;
+    }
+    #submitButton {
+      font-size: 1.5rem;
+      color: #cc0000;
       cursor: pointer;
+      user-select: none;
     }
     #errorMessage {
-      color: red;
       margin-top: 10px;
+      color: red;
     }
   </style>
 </head>
 <body>
-  <!-- Password Overlay -->
+  <!-- Minimal Password Overlay -->
   <div id="passwordOverlay">
-    <form id="passwordForm">
-      <h2>Enter Password</h2>
-      <input type="password" id="passwordInput" placeholder="Password" required />
-      <br/>
-      <input type="submit" value="Submit" />
+    <div id="passwordContainer">
+      <div id="passwordPrompt">Enter Password</div>
+      <div id="passwordDots"></div>
+      <div id="submitButton">Submit</div>
       <div id="errorMessage"></div>
-    </form>
+    </div>
   </div>
 
-  <div class="container">
+  <!-- Main content hidden until password is correct -->
+  <div class="container" id="mainContent" style="display: none;">
     <div class="message">
       <h1>Dear Gabi,</h1>
       <h2>Happy Birthday!</h2>
@@ -95,10 +91,9 @@
 
   <script>
     // Precomputed SHA-256 hash for "gabixthomas"
-    // Replace the value below with the actual hash computed offline.
-    const storedHash = "13ba7a21d923233e00338058a4be1a71833a4dae8bcb29f7b95968fbbee9be69";
+    // Replace the string below with the actual hash computed offline.
+    const storedHash = "b6b1b72ebbdc6ddc8d4ac7f3a0c2b2d2d72b3c9f7a8a0f4f6d8b0f8a2c3e7d1f";
 
-    // Function to compute SHA-256 hash of a string using Web Crypto API
     async function hashPassword(password) {
       const encoder = new TextEncoder();
       const data = encoder.encode(password);
@@ -107,19 +102,45 @@
       return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
-    // Handle password form submission
-    document.getElementById('passwordForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const password = document.getElementById('passwordInput').value;
-      const hash = await hashPassword(password);
-      if(hash === storedHash) {
-        // Correct password: hide overlay and load gallery
+    let typedPassword = "";
+    const passwordDots = document.getElementById('passwordDots');
+    const errorMessage = document.getElementById('errorMessage');
+
+    function updateDots() {
+      passwordDots.textContent = "•".repeat(typedPassword.length);
+    }
+
+    async function checkPassword() {
+      const hash = await hashPassword(typedPassword);
+      if (hash === storedHash) {
         document.getElementById('passwordOverlay').style.display = 'none';
+        document.getElementById('mainContent').style.display = 'block';
         loadGallery();
       } else {
-        document.getElementById('errorMessage').textContent = "Incorrect password. Please try again.";
+        errorMessage.textContent = "Incorrect password. Please try again.";
+        typedPassword = "";
+        updateDots();
+      }
+    }
+
+    // Listen for keystrokes to build the password string
+    document.addEventListener('keydown', function(event) {
+      // Only capture input when the overlay is visible
+      if (document.getElementById('passwordOverlay').style.display !== 'none') {
+        if (event.key === "Backspace") {
+          typedPassword = typedPassword.slice(0, -1);
+          updateDots();
+        } else if (event.key === "Enter") {
+          checkPassword();
+        } else if (event.key.length === 1) {
+          typedPassword += event.key;
+          updateDots();
+        }
       }
     });
+
+    // Allow clicking the "Submit" text to check the password.
+    document.getElementById('submitButton').addEventListener('click', checkPassword);
 
     // Function to load the image gallery
     function loadGallery() {
@@ -136,7 +157,7 @@
         } else {
           colRight.appendChild(img);
         }
-        // Remove the image if it fails to load
+        // Remove image if it fails to load
         img.onerror = function() {
           this.parentNode.removeChild(this);
         };
