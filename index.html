@@ -102,11 +102,17 @@
     }
 
     let typedPassword = "";
+    const passwordPrompt = document.getElementById('passwordPrompt');
     const passwordDots = document.getElementById('passwordDots');
     const errorMessage = document.getElementById('errorMessage');
     const hiddenInput = document.getElementById('hiddenInput');
 
     function updateDots() {
+      if (typedPassword.length > 0) {
+        passwordPrompt.textContent = "";
+      } else {
+        passwordPrompt.textContent = "Enter Password";
+      }
       passwordDots.textContent = "•".repeat(typedPassword.length);
     }
 
